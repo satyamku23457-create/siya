@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>One Last Surprise ❤️</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 25px 15px 70px;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+
+            background:
+                radial-gradient(circle at 15% 15%, #8b174f, transparent 35%),
+                radial-gradient(circle at 85% 85%, #38156b, transparent 40%),
+                #060008;
+        }
+
+        .page {
+            width: min(700px, 100%);
+            margin: auto;
+        }
+
+        .hero {
+            padding: 30px 10px;
+        }
+
+        .hero-icon {
+            font-size: 65px;
+            animation: beat 1.4s infinite;
+        }
+
+        .tiny {
+            margin-top: 12px;
+            font-size: 11px;
+            letter-spacing: 4px;
+            opacity: .55;
+        }
+
+        h1 {
+            margin-top: 15px;
+            font-size: clamp(38px, 10vw, 65px);
+
+            background: linear-gradient(
+                90deg,
+                white,
+                #ff72b5,
+                white
+            );
+
+            background-size: 250%;
+            -webkit-background-clip: text;
+            color: transparent;
+
+            animation: gradient 4s linear infinite;
+        }
+
+        .subtitle {
+            margin: 18px auto;
+            max-width: 550px;
+            line-height: 1.7;
+            opacity: .78;
+        }
+
+        .card {
+            margin-top: 30px;
+            padding: 30px 22px;
+
+            border-radius: 30px;
+
+            background: rgba(255,255,255,.075);
+            border: 1px solid rgba(255,255,255,.16);
+
+            backdrop-filter: blur(20px);
+
+            box-shadow:
+                0 20px 60px rgba(0,0,0,.35);
+        }
+
+        .card h2 {
+            font-size: 28px;
+        }
+
+        .card p {
+            margin-top: 12px;
+            line-height: 1.7;
+            opacity: .75;
+        }
+
+        /* =========================
+           HEART GAME
+        ========================= */
+
+        #gameArea {
+            position: relative;
+
+            height: 280px;
+            margin-top: 25px;
+
+            overflow: hidden;
+
+            border-radius: 22px;
+
+            background:
+                radial-gradient(
+                    circle at 50% 50%,
+                    rgba(255,80,170,.08),
+                    transparent 65%
+                ),
+                rgba(0,0,0,.2);
+
+            border: 1px solid rgba(255,255,255,.06);
+        }
+
+        .heart {
+            position: absolute;
+
+            z-index: 5;
+
+            font-size: 42px;
+            line-height: 1;
+
+            cursor: pointer;
+
+            user-select: none;
+            -webkit-user-select: none;
+
+            animation: floatHeart 2.4s linear forwards;
+
+            filter:
+                drop-shadow(
+                    0 0 12px
+                    rgba(255,80,180,.7)
+                );
+
+            transition:
+                transform .15s ease;
+        }
+
+        .heart:hover {
+            transform: scale(1.25);
+        }
+
+        .heart.caught {
+            animation: caught .25s ease forwards;
+            pointer-events: none;
+        }
+
+        #score {
+            margin-top: 20px;
+
+            font-size: 18px;
+
+            color: #ff9dcc;
+
+            font-weight: bold;
+        }
+
+        #gameMessage {
+            min-height: 28px;
+
+            margin-top: 12px;
+
+            color: #ffd0e6;
+        }
+
+        /* =========================
+           PHOTO SECTION
+        ========================= */
+
+        #photoSection {
+            display: none;
+        }
+
+        #photoSection.show {
+            display: block;
+
+            animation:
+                appear .8s ease;
+        }
+
+        .upload-box {
+            margin-top: 25px;
+
+            padding: 28px 20px;
+
+            border-radius: 25px;
+
+            border:
+                1px dashed
+                rgba(255,255,255,.3);
+
+            background:
+                rgba(255,255,255,.05);
+        }
+
+        .choose-btn,
+        .send-btn {
+            display: inline-block;
+
+            margin-top: 20px;
+
+            padding: 15px 28px;
+
+            border: none;
+
+            border-radius: 100px;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3f91,
+                    #9c2cff
+                );
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 10px 30px
+                rgba(255,63,145,.3);
+        }
+
+        .send-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        #photoInput {
+            display: none;
+        }
+
+        #preview {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(130px, 1fr)
+                );
+
+            gap: 12px;
+
+            margin-top: 25px;
+        }
+
+        .preview-img {
+            width: 100%;
+            height: 150px;
+
+            object-fit: cover;
+
+            border-radius: 18px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.18);
+        }
+
+        #sendStatus {
+            min-height: 25px;
+
+            margin-top: 20px;
+
+            color: #ff9dcc;
+        }
+
+        .note {
+            margin-top: 18px;
+
+            font-size: 12px;
+
+            opacity: .5;
+
+            line-height: 1.6;
+        }
+
+        /* =========================
+           ANIMATIONS
+        ========================= */
+
+        @keyframes beat {
+
+            50% {
+                transform: scale(1.15);
+            }
+
+        }
+
+        @keyframes gradient {
+
+            to {
+                background-position: 250%;
+            }
+
+        }
+
+        @keyframes floatHeart {
+
+            from {
+
+                transform:
+                    translateY(310px)
+                    rotate(-8deg);
+
+                opacity: 0;
+            }
+
+            12% {
+                opacity: 1;
+            }
+
+            88% {
+                opacity: 1;
+            }
+
+            to {
+
+                transform:
+                    translateY(-65px)
+                    rotate(8deg);
+
+                opacity: 0;
+            }
+
+        }
+
+        @keyframes caught {
+
+            to {
+
+                transform: scale(1.8);
+
+                opacity: 0;
+            }
+
+        }
+
+        @keyframes appear {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(25px);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<main class="page">
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-icon">
+            🥹❤️
+        </div>
+
+        <p class="tiny">
+            ONE LAST SURPRISE
+        </p>
+
+        <h1>
+            One Little Game ✨
+        </h1>
+
+        <p class="subtitle">
+            Pehle ek chhota sa game...
+            phir ek special little surprise. 💗
+        </p>
+
+    </section>
+
+
+    <!-- =========================
+         GAME
+    ========================= -->
+
+    <section
+        class="card"
+        id="gameCard"
+    >
+
+        <h2>
+            💗 Catch The Hearts
+        </h2>
+
+        <p>
+            5 hearts catch karo! 👀
+        </p>
+
+        <div id="gameArea"></div>
+
+        <div id="score">
+            Score: 0 / 5
+        </div>
+
+        <div id="gameMessage">
+
+            Ek heart aayega...
+            click karke catch karo! 💗
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         PHOTO SECTION
+    ========================= -->
+
+    <section
+        class="card"
+        id="photoSection"
+    >
+
+        <div style="font-size:55px;">
+            🥹❤️
+        </div>
+
+        <h2>
+            You completed it! ✨
+        </h2>
+
+        <p>
+
+            Ab ek last little thing... 💗
+
+            <br><br>
+
+            Agar tum comfortable ho,
+            to apni kuch favourite photos
+            mere saath share kar sakti ho.
+
+            📸
+
+        </p>
+
+
+        <div class="upload-box">
+
+            <h3 style="margin-bottom:10px;">
+
+                📸 Choose Your Memories
+
+            </h3>
+
+
+            <p
+                style="
+                    font-size:14px;
+                    opacity:.7;
+                "
+            >
+
+                Maximum 10 photos
+                select kar sakti ho ❤️
+
+            </p>
+
+
+            <label
+                for="photoInput"
+                class="choose-btn"
+            >
+
+                📷 Choose Photos
+
+            </label>
+
+
+            <input
+                id="photoInput"
+                type="file"
+                accept="image/*"
+                multiple
+            >
+
+
+            <div
+                id="photoCount"
+                style="
+                    margin-top:15px;
+                    color:#ff9dcc;
+                "
+            >
+            </div>
+
+
+            <div id="preview"></div>
+
+
+            <button
+                class="send-btn"
+                id="sendBtn"
+                type="button"
+                onclick="sendPhotos()"
+            >
+
+                💌 Send To Satyam
+
+            </button>
+
+
+            <p id="sendStatus"></p>
+
+
+            <p class="note">
+
+                Tum jo photos select karogi,
+                sirf wahi send hongi.
+
+                ❤️
+
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+/* =========================
+   HEART GAME
+========================= */
+
+const gameArea =
+    document.getElementById("gameArea");
+
+const scoreElement =
+    document.getElementById("score");
+
+const gameMessage =
+    document.getElementById("gameMessage");
+
+const photoSection =
+    document.getElementById("photoSection");
+
+
+const TARGET_SCORE = 5;
+
+let score = 0;
+
+let gameRunning = true;
+
+let heartTimer = null;
+
+
+/* =========================
+   UPDATE SCORE
+========================= */
+
+function updateScore() {
+
+    scoreElement.innerText =
+        `Score: ${score} / ${TARGET_SCORE}`;
+
+}
+
+
+/* =========================
+   CREATE HEART
+========================= */
+
+function createHeart() {
+
+    if (!gameRunning) {
+        return;
+    }
+
+
+    const heart =
+        document.createElement("div");
+
+
+    heart.className =
+        "heart";
+
+
+    heart.innerText =
+        "❤️";
+
+
+    const maxLeft =
+        Math.max(
+            10,
+            gameArea.clientWidth - 55
+        );
+
+
+    const left =
+        Math.floor(
+            Math.random() * maxLeft
+        );
+
+
+    heart.style.left =
+        `${left}px`;
+
+
+    const size =
+        34 +
+        Math.floor(
+            Math.random() * 18
+        );
+
+
+    heart.style.fontSize =
+        `${size}px`;
+
+
+    /* CLICK HEART */
+
+    heart.addEventListener(
+        "click",
+        function () {
+
+            if (
+                !gameRunning ||
+                heart.classList.contains("caught")
+            ) {
+                return;
+            }
+
+
+            heart.classList.add(
+                "caught"
+            );
+
+
+            score++;
+
+
+            updateScore();
+
+
+            if (
+                score >= TARGET_SCORE
+            ) {
+
+                finishGame();
+
+            }
+
+            else {
+
+                const remaining =
+                    TARGET_SCORE - score;
+
+
+                gameMessage.innerText =
+                    `Nice! ${remaining} aur heart${
+                        remaining === 1
+                        ? ""
+                        : "s"
+                    } catch karo 💗`;
+
+            }
+
+
+            setTimeout(
+                () => {
+
+                    heart.remove();
+
+                },
+                250
+            );
+
+        }
+    );
+
+
+    gameArea.appendChild(
+        heart
+    );
+
+
+    /* REMOVE AFTER ANIMATION */
+
+    setTimeout(
+        () => {
+
+            if (heart.isConnected) {
+
+                heart.remove();
+
+            }
+
+        },
+        2500
+    );
+
+}
+
+
+/* =========================
+   START HEART SPAWNER
+========================= */
+
+function startHeartSpawner() {
+
+    createHeart();
+
+
+    heartTimer =
+        setInterval(
+            () => {
+
+                if (gameRunning) {
+
+                    createHeart();
+
+                }
+
+            },
+            850
+        );
+
+}
+
+
+/* =========================
+   FINISH GAME
+========================= */
+
+function finishGame() {
+
+    gameRunning = false;
+
+
+    if (heartTimer) {
+
+        clearInterval(
+            heartTimer
+        );
+
+        heartTimer = null;
+
+    }
+
+
+    document
+        .querySelectorAll(".heart")
+        .forEach(
+            heart => heart.remove()
+        );
+
+
+    scoreElement.innerText =
+        `Score: ${TARGET_SCORE} / ${TARGET_SCORE} 🎉`;
+
+
+    gameMessage.innerText =
+        "You caught them all! 🥹❤️ Surprise unlocked...";
+
+
+    setTimeout(
+        () => {
+
+            photoSection.classList.add(
+                "show"
+            );
+
+
+            photoSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        },
+        700
+    );
+
+}
+
+
+/* START GAME */
+
+updateScore();
+
+startHeartSpawner();
+
+
+/* =========================
+   PHOTO UPLOAD
+========================= */
+
+const photoInput =
+    document.getElementById(
+        "photoInput"
+    );
+
+
+const preview =
+    document.getElementById(
+        "preview"
+    );
+
+
+const photoCount =
+    document.getElementById(
+        "photoCount"
+    );
+
+
+const sendStatus =
+    document.getElementById(
+        "sendStatus"
+    );
+
+
+const sendBtn =
+    document.getElementById(
+        "sendBtn"
+    );
+
+
+const MAX_PHOTOS = 10;
+
+
+/* =========================
+   PHOTO SELECTION
+========================= */
+
+photoInput.addEventListener(
+    "change",
+    function () {
+
+        preview.innerHTML =
+            "";
+
+        sendStatus.innerText =
+            "";
+
+
+        const files =
+            Array.from(
+                this.files
+            );
+
+
+        if (
+            files.length >
+            MAX_PHOTOS
+        ) {
+
+            photoCount.innerText =
+                "⚠️ Maximum 10 photos allowed.";
+
+
+            this.value =
+                "";
+
+
+            return;
+
+        }
+
+
+        if (
+            files.length === 0
+        ) {
+
+            photoCount.innerText =
+                "";
+
+
+            return;
+
+        }
+
+
+        photoCount.innerText =
+            `📸 ${files.length} / ${MAX_PHOTOS} photos selected ❤️`;
+
+
+        files.forEach(
+            file => {
+
+                if (
+                    !file.type.startsWith(
+                        "image/"
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                const reader =
+                    new FileReader();
+
+
+                reader.onload =
+                    function (e) {
+
+                        const img =
+                            document.createElement(
+                                "img"
+                            );
+
+
+                        img.src =
+                            e.target.result;
+
+
+                        img.className =
+                            "preview-img";
+
+
+                        preview.appendChild(
+                            img
+                        );
+
+                    };
+
+
+                reader.readAsDataURL(
+                    file
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================
+   SEND PHOTOS
+========================= */
+
+async function sendPhotos() {
+
+    const files =
+        Array.from(
+            photoInput.files
+        );
+
+
+    if (
+        !files.length
+    ) {
+
+        sendStatus.innerText =
+            "📸 Pehle kuch photos select karo ❤️";
+
+
+        return;
+
+    }
+
+
+    if (
+        files.length >
+        MAX_PHOTOS
+    ) {
+
+        sendStatus.innerText =
+            "⚠️ Maximum 10 photos hi select kar sakti ho.";
+
+
+        return;
+
+    }
+
+
+    const imageFiles =
+        files.filter(
+            file =>
+                file.type.startsWith(
+                    "image/"
+                )
+        );
+
+
+    if (
+        !imageFiles.length
+    ) {
+
+        sendStatus.innerText =
+            "❌ Sirf image files select karo.";
+
+
+        return;
+
+    }
+
+
+    const formData =
+        new FormData();
+
+
+    imageFiles.forEach(
+        file => {
+
+            formData.append(
+                "photos",
+                file
+            );
+
+        }
+    );
+
+
+    sendBtn.disabled =
+        true;
+
+
+    sendBtn.innerText =
+        "Sending... 💌";
+
+
+    sendStatus.innerText =
+        "Tumhari memories send ho rahi hain... ❤️";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/send-photos",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data.success
+        ) {
+
+            sendStatus.innerText =
+                `🥹❤️ ${data.count} photo(s) successfully sent.`;
+
+
+            sendBtn.innerText =
+                "Sent With Love ❤️";
+
+        }
+
+        else {
+
+            sendStatus.innerText =
+                "❌ " +
+                (
+                    data.message ||
+                    "Something went wrong."
+                );
+
+
+            sendBtn.disabled =
+                false;
+
+
+            sendBtn.innerText =
+                "💌 Send To Satyam";
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        sendStatus.innerText =
+            "❌ Photos send nahi ho paayi. Please try again.";
+
+
+        sendBtn.disabled =
+            false;
+
+
+        sendBtn.innerText =
+            "💌 Send To Satyam";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

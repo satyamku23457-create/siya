@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Just For You ❤️</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    padding:30px 18px 60px;
+    font-family:Arial,sans-serif;
+    color:white;
+
+    background:
+        radial-gradient(circle at 15% 10%,#8b174f,transparent 35%),
+        radial-gradient(circle at 85% 90%,#38156b,transparent 40%),
+        #060008;
+}
+
+.page{
+    width:min(700px,100%);
+    margin:auto;
+    text-align:center;
+}
+
+.top{
+    padding:25px 10px 35px;
+}
+
+.icon{
+    font-size:65px;
+    animation:pulse 1.5s infinite;
+}
+
+.small{
+    margin-top:12px;
+    font-size:11px;
+    letter-spacing:4px;
+    opacity:.55;
+}
+
+h1{
+    margin-top:15px;
+    font-size:clamp(38px,9vw,65px);
+
+    background:linear-gradient(90deg,#fff,#ff72b5,#fff);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.subtitle{
+    margin:18px auto;
+    max-width:550px;
+    line-height:1.8;
+    opacity:.75;
+}
+
+.progress{
+    width:100%;
+    height:7px;
+    margin:15px 0 30px;
+
+    border-radius:20px;
+    background:rgba(255,255,255,.12);
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#ff3f91,#9c2cff);
+    transition:.5s;
+}
+
+.game{
+    padding:35px 25px;
+    border-radius:30px;
+
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.16);
+
+    backdrop-filter:blur(20px);
+
+    box-shadow:0 25px 70px rgba(0,0,0,.45);
+
+    animation:appear .7s ease;
+}
+
+.game-number{
+    font-size:13px;
+    opacity:.55;
+    letter-spacing:2px;
+}
+
+.game h2{
+    margin-top:15px;
+    font-size:28px;
+    line-height:1.4;
+}
+
+.question{
+    margin-top:18px;
+    font-size:17px;
+    line-height:1.8;
+    opacity:.85;
+}
+
+.options{
+    display:grid;
+    gap:14px;
+    margin-top:28px;
+}
+
+.option{
+    width:100%;
+    padding:16px 20px;
+
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.15);
+
+    background:rgba(255,255,255,.07);
+    color:white;
+
+    font-size:16px;
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.option:hover{
+    transform:translateY(-3px);
+    background:rgba(255,105,180,.18);
+}
+
+.option.selected{
+    background:linear-gradient(135deg,#ff3f91,#9c2cff);
+    border-color:transparent;
+}
+
+.next{
+    display:none;
+    margin-top:28px;
+
+    padding:15px 32px;
+
+    border:0;
+    border-radius:100px;
+
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+
+    background:linear-gradient(135deg,#ff3f91,#9c2cff);
+
+    cursor:pointer;
+
+    box-shadow:0 12px 35px rgba(255,63,145,.3);
+}
+
+.next.show{
+    display:inline-block;
+    animation:appear .4s ease;
+}
+
+.result{
+    display:none;
+    margin-top:30px;
+    padding:35px 22px;
+
+    border-radius:30px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,63,145,.16),
+            rgba(130,36,216,.16)
+        );
+
+    border:1px solid rgba(255,105,180,.25);
+}
+
+.result.show{
+    display:block;
+    animation:appear .8s ease;
+}
+
+.result .heart{
+    font-size:65px;
+}
+
+.result h2{
+    margin-top:15px;
+    font-size:30px;
+}
+
+.result p{
+    margin-top:15px;
+    line-height:1.9;
+    opacity:.85;
+}
+
+.continue{
+    display:inline-block;
+    margin-top:25px;
+    padding:16px 32px;
+
+    border-radius:100px;
+
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+
+    background:linear-gradient(135deg,#ff3f91,#ff69b4);
+
+    box-shadow:0 12px 35px rgba(255,63,145,.3);
+}
+
+@keyframes appear{
+    from{
+        opacity:0;
+        transform:translateY(20px) scale(.97);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+}
+
+@keyframes pulse{
+    50%{
+        transform:scale(1.15);
+    }
+}
+
+@media(max-width:500px){
+
+    .game{
+        padding:30px 18px;
+    }
+
+    .game h2{
+        font-size:24px;
+    }
+
+    .question{
+        font-size:15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<main class="page">
+
+    <section class="top">
+
+        <div class="icon">💗</div>
+
+        <p class="small">
+            A LITTLE GAME FOR YOU
+        </p>
+
+        <h1>
+            Just For You...
+        </h1>
+
+        <p class="subtitle">
+            Ab thoda sa fun karte hain 😌❤️
+            Kuch questions hain... bas wahi answer karna
+            jo tumhe genuinely feel ho.
+        </p>
+
+    </section>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <section class="game" id="game">
+
+        <div class="game-number" id="gameNumber">
+            MOMENT 1 OF 6
+        </div>
+
+        <h2 id="gameTitle">
+            Let's start... ✨
+        </h2>
+
+        <p class="question" id="question">
+            Agar hum dono ek free evening spend karein,
+            tum kya choose karogi?
+        </p>
+
+        <div class="options" id="options"></div>
+
+        <button class="next" id="nextBtn">
+            Next ❤️
+        </button>
+
+    </section>
+
+
+    <section class="result" id="result">
+
+        <div class="heart">
+            🥹❤️
+        </div>
+
+        <h2>
+            You actually completed it!
+        </h2>
+
+        <p>
+            Ab mujhe tumhare answers bhi pata chal gaye...
+            aur honestly, ye little game banane mein
+            mujhe jitna maza aaya, shayad tumhe bhi
+            thoda aaya hoga. ✨
+        </p>
+
+        <p>
+            Lekin wait...
+            <br>
+            <strong>abhi ek last surprise baaki hai. 💌</strong>
+        </p>
+
+        <a href="/last-surprise" class="continue-btn">
+    💌 Continue To The Last Surprise
+</a>
+    </section>
+
+</main>
+
+
+<script>
+
+const games = [
+
+    {
+        title:"Agar hum dono free ho...",
+        question:"Ek perfect evening tum kaise spend karna chahogi?",
+        options:[
+            "🌆 Long walk + baatein",
+            "☕ Coffee + random talks",
+            "🎬 Movie + snacks",
+            "😂 Bas bina plan ke masti"
+        ]
+    },
+
+    {
+        title:"Ek honest choice...",
+        question:"Tumhe kisi person mein sabse zyada kya pasand aata hai?",
+        options:[
+            "😊 Sense of humour",
+            "🫶 Caring nature",
+            "✨ Personality",
+            "💬 The way they talk"
+        ]
+    },
+
+    {
+        title:"Suppose hum kahin chale jaayein...",
+        question:"Tum kya choose karogi?",
+        options:[
+            "🏔️ Mountains",
+            "🌊 Beach",
+            "🌃 Beautiful city",
+            "🌲 Peaceful place"
+        ]
+    },
+
+    {
+        title:"Important question 😌",
+        question:"Agar koi tumhe genuinely special feel karaye...",
+        options:[
+            "❤️ Main appreciate karungi",
+            "🥹 Thoda shy ho jaungi",
+            "😊 Main bhi special feel karwaungi",
+            "✨ Depends on the person"
+        ]
+    },
+
+    {
+        title:"One little moment...",
+        question:"Tumhe kaunsa moment zyada beautiful lagta hai?",
+        options:[
+            "🌅 Sunset together",
+            "🌙 Late night talks",
+            "😂 Random laughing",
+            "📸 Cute memories"
+        ]
+    },
+
+    {
+        title:"Last one... ❤️",
+        question:"Agar tumhe kisi ke saath ek beautiful memory create karni ho...",
+        options:[
+            "🫶 Simple & peaceful",
+            "✨ Something unexpected",
+            "😂 Something crazy & funny",
+            "❤️ Something we'll remember forever"
+        ]
+    }
+
+];
+
+let current = 0;
+let selected = null;
+let answers = [];
+
+const gameNumber = document.getElementById("gameNumber");
+const gameTitle = document.getElementById("gameTitle");
+const question = document.getElementById("question");
+const options = document.getElementById("options");
+const nextBtn = document.getElementById("nextBtn");
+const progressBar = document.getElementById("progressBar");
+const game = document.getElementById("game");
+const result = document.getElementById("result");
+
+
+function loadGame(){
+
+    selected = null;
+
+    const item = games[current];
+
+    gameNumber.innerText =
+        `MOMENT ${current + 1} OF ${games.length}`;
+
+    gameTitle.innerText = item.title;
+
+    question.innerText = item.question;
+
+    options.innerHTML = "";
+
+    nextBtn.classList.remove("show");
+
+    progressBar.style.width =
+        `${(current / games.length) * 100}%`;
+
+
+    item.options.forEach(function(text,index){
+
+        const button =
+            document.createElement("button");
+
+        button.className = "option";
+
+        button.innerText = text;
+
+        button.onclick = function(){
+
+            document
+                .querySelectorAll(".option")
+                .forEach(function(btn){
+                    btn.classList.remove("selected");
+                });
+
+            button.classList.add("selected");
+
+            selected = text;
+
+            nextBtn.classList.add("show");
+        };
+
+        options.appendChild(button);
+
+    });
+
+}
+
+
+nextBtn.addEventListener("click",function(){
+
+    if(!selected) return;
+
+    answers.push({
+        question: games[current].question,
+        answer: selected
+    });
+
+    current++;
+
+    if(current >= games.length){
+
+        progressBar.style.width = "100%";
+
+        game.style.display = "none";
+
+        result.classList.add("show");
+
+        // Answers Flask ko bhejna
+        fetch("/game-response",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                answers:answers
+            })
+
+        }).catch(function(error){
+
+            console.error(
+                "Game response error:",
+                error
+            );
+
+        });
+
+        return;
+    }
+
+    loadGame();
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+});
+
+
+loadGame();
+
+</script>
+
+</body>
+</html>

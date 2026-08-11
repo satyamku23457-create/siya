@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>One More Thing ❤️</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 25px;
+
+            font-family: Arial, sans-serif;
+            color: white;
+
+            background:
+                radial-gradient(circle at 15% 15%, #64133f, transparent 38%),
+                radial-gradient(circle at 85% 85%, #35115e, transparent 38%),
+                #08000d;
+        }
+
+        .card {
+            width: min(600px, 100%);
+
+            padding: 45px 25px;
+
+            text-align: center;
+
+            border-radius: 32px;
+
+            background: rgba(255, 255, 255, 0.08);
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.16);
+
+            backdrop-filter: blur(22px);
+
+            box-shadow:
+                0 30px 100px
+                rgba(0, 0, 0, 0.55);
+
+            animation: appear 0.8s ease;
+        }
+
+        .emoji {
+            font-size: 65px;
+
+            margin-bottom: 15px;
+
+            animation: float 2.5s ease-in-out infinite;
+        }
+
+        .small {
+            font-size: 12px;
+
+            letter-spacing: 3px;
+
+            opacity: 0.55;
+
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: clamp(34px, 8vw, 52px);
+
+            background:
+                linear-gradient(
+                    90deg,
+                    white,
+                    #ff78b7,
+                    white
+                );
+
+            -webkit-background-clip: text;
+            color: transparent;
+
+            margin-bottom: 18px;
+        }
+
+        .question {
+            font-size: 19px;
+
+            line-height: 1.7;
+
+            color:
+                rgba(255, 255, 255, 0.82);
+
+            margin-bottom: 30px;
+        }
+
+        .choices {
+            display: grid;
+
+            gap: 14px;
+        }
+
+        .choice {
+            width: 100%;
+
+            padding: 18px;
+
+            border-radius: 20px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.13);
+
+            background:
+                rgba(255, 255, 255, 0.07);
+
+            color: white;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.25s ease,
+                background 0.25s ease,
+                border 0.25s ease;
+        }
+
+        .choice:hover {
+            transform: translateY(-3px);
+
+            background:
+                rgba(255, 105, 180, 0.15);
+
+            border-color:
+                rgba(255, 105, 180, 0.35);
+        }
+
+        #answer {
+            min-height: 30px;
+
+            margin-top: 25px;
+
+            font-size: 16px;
+
+            color: #ff9bc9;
+
+            line-height: 1.6;
+        }
+
+        .continue {
+            display: none;
+
+            margin-top: 25px;
+
+            padding: 15px 30px;
+
+            border-radius: 100px;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3f91,
+                    #ff69b4
+                );
+
+            box-shadow:
+                0 10px 30px
+                rgba(255, 63, 145, 0.35);
+        }
+
+        .continue.show {
+            display: inline-block;
+
+            animation: appear 0.5s ease;
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes float {
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="card">
+
+        <div class="emoji">
+            ✨
+        </div>
+
+        <p class="small">
+            ONE MORE LITTLE QUESTION
+        </p>
+
+        <h1>
+            One More Thing...
+        </h1>
+
+        <p class="question">
+            If we could spend one perfect day together,
+            what would you choose? ❤️
+        </p>
+
+        <div class="choices">
+
+            <button
+                class="choice"
+                onclick="choose('walk')"
+            >
+                🌆 A long evening walk
+            </button>
+
+            <button
+                class="choice"
+                onclick="choose('coffee')"
+            >
+                ☕ Coffee + endless talks
+            </button>
+
+            <button
+                class="choice"
+                onclick="choose('stars')"
+            >
+                🌙 Sitting under the stars
+            </button>
+
+        </div>
+
+        <div id="answer"></div>
+
+        <a
+            id="continueBtn"
+            class="continue"
+            href="/final-proposal"
+        >
+            There’s still one last thing... ❤️
+        </a>
+
+    </main>
+
+
+    <script>
+
+        function choose(option) {
+
+            const answer =
+                document.getElementById("answer");
+
+            const continueBtn =
+                document.getElementById("continueBtn");
+
+            if (option === "walk") {
+
+                answer.innerText =
+                    "That sounds beautiful... just walking, talking, and forgetting about everything else. 🌆❤️";
+
+            }
+
+            if (option === "coffee") {
+
+                answer.innerText =
+                    "Honestly, endless conversations over coffee sounds pretty perfect. ☕❤️";
+
+            }
+
+            if (option === "stars") {
+
+                answer.innerText =
+                    "Okay... sitting under the stars and talking for hours sounds magical. 🌙✨";
+
+            }
+
+            continueBtn.classList.add("show");
+        }
+
+    </script>
+
+</body>
+
+</html>

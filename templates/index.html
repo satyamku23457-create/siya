@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>For Siya ❤️</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="floating">
+    ❤️ ✨ ♡ ❤️ ✦
+</div>
+
+<div class="card">
+
+    <!-- Bear GIF/WebP -->
+    <div class="bear-container">
+        <img
+            src="{{ url_for('static', filename='bear.webp') }}"
+            class="bear"
+            alt="Cute bear"
+        >
+    </div>
+
+    <p class="small">
+        I have something special to ask you...
+    </p>
+
+    <h1>
+        Siya <span>❤️</span>
+    </h1>
+
+    <div class="line"></div>
+
+    <p class="message">
+
+        Some people make ordinary moments
+        feel a little more special.
+
+        <br><br>
+
+        And somehow,
+        you became one of those people for me.
+
+    </p>
+
+    <h2>
+        Will you be mine? ❤️
+    </h2>
+
+    <p id="hint">
+        One honest question. One special answer.
+    </p>
+
+    <div class="buttons">
+
+        <button id="yesBtn" class="yes">
+            YES ❤️
+        </button>
+
+        <button id="noBtn" class="no">
+            NO
+        </button>
+
+    </div>
+
+    <p class="note">
+        Choose whichever answer feels right to you.
+    </p>
+
+</div>
+
+
+<div id="success" class="success">
+
+    <div class="success-card">
+
+        <div class="big-heart">
+            ❤️
+        </div>
+
+        <h2>
+            SIYA SAID YES! 🥹❤️
+        </h2>
+
+        <p>
+            You just made my whole world
+            a little more beautiful. ✨
+        </p>
+
+        <p class="success-subtitle">
+            But wait... I have something more special for you. 💌
+        </p>
+
+        <a href="/real-proposal" class="proposal-link">
+            💌 Open My Real Proposal
+        </a>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='script.js') }}"
+></script>
+
+</body>
+
+</html>
