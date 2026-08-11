@@ -27,17 +27,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const maxNoClicks = 8;
 
 
-    // ==========================
-    // YES
-    // ==========================
+    // =========================
+    // SEND RESPONSE
+    // =========================
 
-    yesBtn.addEventListener("click", function () {
-
-        if (busy) return;
-
-        busy = true;
-
-        success.classList.add("show");
+    function saveResponse(answer) {
 
         fetch("/response", {
             method: "POST",
@@ -45,30 +39,62 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                answer: "YES",
+                answer: answer,
                 noClicks: noCount
-            })
+            }),
+            keepalive: true
         })
         .then(response => {
+
             if (!response.ok) {
                 throw new Error("Server error");
             }
 
             return response.json();
+
         })
         .then(data => {
-            console.log("YES saved:", data);
+
+            console.log(
+                `${answer} response saved:`,
+                data
+            );
+
         })
         .catch(error => {
-            console.error("YES response error:", error);
+
+            console.error(
+                `${answer} response error:`,
+                error
+            );
+
         });
+    }
+
+
+    // =========================
+    // YES
+    // =========================
+
+    yesBtn.addEventListener("click", function () {
+
+        if (busy) return;
+
+        busy = true;
+
+        // UI changes IMMEDIATELY
+        success.classList.add("show");
+
+        // Send in background.
+        // UI does not wait for email.
+        saveResponse("YES");
 
     });
 
 
-    // ==========================
+    // =========================
     // NO
-    // ==========================
+    // =========================
 
     noBtn.addEventListener("click", function () {
 
@@ -89,17 +115,23 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
         if (remaining > 0) {
+
             message +=
                 `\n\nNO ke ${remaining} chances bache hain ❤️`;
+
         } else {
+
             message +=
                 "\n\nAb tumhara final decision hai ❤️";
+
         }
 
         hint.innerText = message;
 
 
-        // YES bada hota rahe
+        // =========================
+        // YES BIGGER
+        // =========================
 
         const yesScale = Math.min(
             1 + (noCount * 0.10),
@@ -110,7 +142,9 @@ document.addEventListener("DOMContentLoaded", function () {
             `scale(${yesScale})`;
 
 
-        // NO chhota + idhar-udhar
+        // =========================
+        // NO SMALLER + MOVE
+        // =========================
 
         const noScale = Math.max(
             1 - (noCount * 0.07),
@@ -127,33 +161,11 @@ document.addEventListener("DOMContentLoaded", function () {
             `translate(${moveX}px, ${moveY}px) scale(${noScale})`;
 
 
-        // NO save karo
+        // =========================
+        // SAVE NO
+        // =========================
 
-        fetch("/response", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                answer: "NO",
-                noClicks: noCount
-            })
-        })
-        .then(response => {
-
-            if (!response.ok) {
-                throw new Error("Server error");
-            }
-
-            return response.json();
-
-        })
-        .then(data => {
-            console.log("NO saved:", data);
-        })
-        .catch(error => {
-            console.error("NO response error:", error);
-        });
+        saveResponse("NO");
 
     });
 

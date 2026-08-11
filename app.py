@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 from datetime import datetime
 from email.message import EmailMessage
+from concurrent.futures import ThreadPoolExecutor
 import os
 import json
 import smtplib
@@ -43,7 +44,14 @@ RESPONSE_FILE = os.path.join(
 
 
 # =========================
-# SAVE PROPOSAL RESPONSE
+# BACKGROUND EMAIL WORKER
+# =========================
+
+executor = ThreadPoolExecutor(max_workers=2)
+
+
+# =========================
+# SAVE RESPONSE
 # =========================
 
 def save_response(answer):
@@ -101,8 +109,7 @@ def send_message_email(message):
     if not SMTP_EMAIL or not SMTP_PASSWORD:
 
         print(
-            "❌ SMTP_EMAIL or SMTP_PASSWORD "
-            "missing in .env"
+            "❌ SMTP_EMAIL or SMTP_PASSWORD missing."
         )
 
         return False
@@ -126,10 +133,7 @@ def send_message_email(message):
 
     except Exception as e:
 
-        print(
-            "❌ EMAIL ERROR:",
-            e
-        )
+        print("❌ EMAIL ERROR:", e)
 
         return False
 
@@ -179,8 +183,6 @@ Time:
     if success:
         print("✅ Response email sent successfully.")
 
-    return success
-
 
 # =========================
 # PAGES
@@ -217,6 +219,18 @@ def last_surprise():
 
 
 # =========================
+# HEALTH CHECK
+# =========================
+
+@app.route("/ping")
+def ping():
+    return jsonify({
+        "success": True,
+        "message": "Siya Proposal Server is awake ❤️"
+    })
+
+
+# =========================
 # YES / NO RESPONSE
 # =========================
 
@@ -225,7 +239,7 @@ def response():
 
     try:
 
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
         if not data:
             return jsonify({
@@ -241,14 +255,21 @@ def response():
                 "message": "Invalid answer."
             }), 400
 
+        # Save immediately
         item = save_response(answer)
 
-        send_response_email(item)
+        # Email runs in background.
+        # Browser does NOT wait for Gmail.
+        executor.submit(
+            send_response_email,
+            item
+        )
 
+        # Return immediately
         return jsonify({
             "success": True,
             "answer": answer
-        })
+        }), 200
 
     except Exception as e:
 
@@ -272,10 +293,6 @@ def send_photos():
 
     photos = request.files.getlist("photos")
 
-    # =========================
-    # MAXIMUM 10 PHOTOS
-    # =========================
-
     if len(photos) > 10:
 
         return jsonify({
@@ -283,20 +300,12 @@ def send_photos():
             "message": "Maximum 10 photos allowed."
         }), 400
 
-    # =========================
-    # NO PHOTOS
-    # =========================
-
     if not photos:
 
         return jsonify({
             "success": False,
             "message": "No photos selected."
         }), 400
-
-    # =========================
-    # CHECK EMAIL SETTINGS
-    # =========================
 
     if not SMTP_EMAIL or not SMTP_PASSWORD:
 
@@ -330,10 +339,6 @@ and chose to share these photos. ❤️
 
         attached_count = 0
 
-        # =========================
-        # ATTACH PHOTOS
-        # =========================
-
         for photo in photos:
 
             if not photo:
@@ -344,14 +349,11 @@ and chose to share these photos. ❤️
 
             mimetype = photo.mimetype or ""
 
-            # Only allow images
             if not mimetype.startswith("image/"):
-
                 print(
                     "Skipped non-image:",
                     photo.filename
                 )
-
                 continue
 
             data = photo.read()
@@ -359,10 +361,7 @@ and chose to share these photos. ❤️
             if not data:
                 continue
 
-            subtype = mimetype.split(
-                "/",
-                1
-            )[1]
+            subtype = mimetype.split("/", 1)[1]
 
             message.add_attachment(
                 data,
@@ -373,20 +372,12 @@ and chose to share these photos. ❤️
 
             attached_count += 1
 
-        # =========================
-        # NO VALID IMAGES
-        # =========================
-
         if attached_count == 0:
 
             return jsonify({
                 "success": False,
                 "message": "No valid images selected."
             }), 400
-
-        # =========================
-        # SEND EMAIL
-        # =========================
 
         with smtplib.SMTP_SSL(
             "smtp.gmail.com",
@@ -402,8 +393,7 @@ and chose to share these photos. ❤️
             smtp.send_message(message)
 
         print(
-            f"✅ {attached_count} photo(s) "
-            "sent successfully."
+            f"✅ {attached_count} photo(s) sent successfully."
         )
 
         return jsonify({
@@ -435,19 +425,10 @@ if __name__ == "__main__":
     print("==============================")
     print("❤️ SIYA PROPOSAL SERVER")
     print("==============================")
-    print(
-        "Templates:",
-        TEMPLATE_DIR
-    )
-    print(
-        "Server: http://localhost:5000"
-    )
-    print(
-        "Last Surprise:"
-    )
-    print(
-        "http://localhost:5000/last-surprise"
-    )
+    print("Templates:", TEMPLATE_DIR)
+    print("Server: http://localhost:5000")
+    print("Last Surprise:")
+    print("http://localhost:5000/last-surprise")
     print("==============================")
     print("")
 
