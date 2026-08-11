@@ -1,58 +1,69 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 from datetime import datetime
-from email.message import EmailMessage
 from concurrent.futures import ThreadPoolExecutor
 import os
 import json
-import smtplib
+import base64
+import resend
 
-
-# =========================
-# PATHS + ENVIRONMENT
-# =========================
+# =========================================================
+# PATHS
+# =========================================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+RESPONSE_FILE = os.path.join(BASE_DIR, "responses.json")
 
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# =========================================================
+# ENV
+# =========================================================
 
+load_dotenv(
+    os.path.join(BASE_DIR, ".env")
+)
 
-# =========================
-# FLASK APP
-# =========================
+# =========================================================
+# FLASK
+# =========================================================
 
 app = Flask(
     __name__,
     template_folder=TEMPLATE_DIR
 )
 
+# =========================================================
+# RESEND CONFIG
+# =========================================================
 
-# =========================
-# CONFIG
-# =========================
-
-SMTP_EMAIL = os.getenv("SMTP_EMAIL")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-
-TO_EMAIL = "satyamku23457@gmail.com"
-
-RESPONSE_FILE = os.path.join(
-    BASE_DIR,
-    "responses.json"
+RESEND_API_KEY = os.getenv(
+    "RESEND_API_KEY"
 )
 
+RESEND_FROM_EMAIL = os.getenv(
+    "RESEND_FROM_EMAIL",
+    "onboarding@resend.dev"
+)
 
-# =========================
-# BACKGROUND EMAIL WORKER
-# =========================
+# Your Resend account email
+TO_EMAIL = "satyamku23457@gmail.com"
 
-executor = ThreadPoolExecutor(max_workers=2)
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+else:
+    print("❌ RESEND_API_KEY is missing.")
 
+# =========================================================
+# BACKGROUND WORKER
+# =========================================================
 
-# =========================
+executor = ThreadPoolExecutor(
+    max_workers=2
+)
+
+# =========================================================
 # SAVE RESPONSE
-# =========================
+# =========================================================
 
 def save_response(answer):
 
@@ -61,6 +72,7 @@ def save_response(answer):
     if os.path.exists(RESPONSE_FILE):
 
         try:
+
             with open(
                 RESPONSE_FILE,
                 "r",
@@ -73,6 +85,7 @@ def save_response(answer):
                     data = []
 
         except Exception:
+
             data = []
 
     item = {
@@ -100,49 +113,19 @@ def save_response(answer):
     return item
 
 
-# =========================
-# SEND EMAIL
-# =========================
-
-def send_message_email(message):
-
-    if not SMTP_EMAIL or not SMTP_PASSWORD:
-
-        print(
-            "❌ SMTP_EMAIL or SMTP_PASSWORD missing."
-        )
-
-        return False
-
-    try:
-
-        with smtplib.SMTP_SSL(
-            "smtp.gmail.com",
-            465,
-            timeout=20
-        ) as smtp:
-
-            smtp.login(
-                SMTP_EMAIL,
-                SMTP_PASSWORD
-            )
-
-            smtp.send_message(message)
-
-        return True
-
-    except Exception as e:
-
-        print("❌ EMAIL ERROR:", e)
-
-        return False
-
-
-# =========================
-# YES / NO EMAIL
-# =========================
+# =========================================================
+# SEND YES / NO EMAIL
+# =========================================================
 
 def send_response_email(item):
+
+    if not RESEND_API_KEY:
+
+        print(
+            "❌ RESEND_API_KEY missing."
+        )
+
+        return
 
     if item["answer"] == "YES":
 
@@ -155,6 +138,8 @@ Siya clicked YES ❤️
 
 Time:
 {item["time"]}
+
+Your proposal website received a YES response.
 """
 
     else:
@@ -168,165 +153,71 @@ Siya clicked NO.
 
 Time:
 {item["time"]}
+
+Your proposal website received a NO response.
 """
-
-    message = EmailMessage()
-
-    message["Subject"] = subject
-    message["From"] = SMTP_EMAIL
-    message["To"] = TO_EMAIL
-
-    message.set_content(body)
-
-    success = send_message_email(message)
-
-    if success:
-        print("✅ Response email sent successfully.")
-
-
-# =========================
-# PAGES
-# =========================
-
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-
-@app.route("/real-proposal")
-def real_proposal():
-    return render_template("real-proposal.html")
-
-
-@app.route("/page-3")
-def page_3():
-    return render_template("page-3.html")
-
-
-@app.route("/final-proposal")
-def final_proposal():
-    return render_template("final-proposal.html")
-
-
-@app.route("/page-5")
-def page_5():
-    return render_template("page-5.html")
-
-
-@app.route("/last-surprise")
-def last_surprise():
-    return render_template("last-surprise.html")
-
-
-# =========================
-# HEALTH CHECK
-# =========================
-
-@app.route("/ping")
-def ping():
-    return jsonify({
-        "success": True,
-        "message": "Siya Proposal Server is awake ❤️"
-    })
-
-
-# =========================
-# YES / NO RESPONSE
-# =========================
-
-@app.route("/response", methods=["POST"])
-def response():
 
     try:
 
-        data = request.get_json(silent=True)
+        result = resend.Emails.send({
 
-        if not data:
-            return jsonify({
-                "success": False,
-                "message": "Invalid request."
-            }), 400
+            "from": RESEND_FROM_EMAIL,
 
-        answer = data.get("answer")
+            "to": [
+                TO_EMAIL
+            ],
 
-        if answer not in ["YES", "NO"]:
-            return jsonify({
-                "success": False,
-                "message": "Invalid answer."
-            }), 400
+            "subject": subject,
 
-        # Save immediately
-        item = save_response(answer)
+            "text": body
+        })
 
-        # Email runs in background.
-        # Browser does NOT wait for Gmail.
-        executor.submit(
-            send_response_email,
-            item
+        print(
+            "✅ RESPONSE EMAIL SENT:"
         )
 
-        # Return immediately
-        return jsonify({
-            "success": True,
-            "answer": answer
-        }), 200
+        print(result)
 
     except Exception as e:
 
         print(
-            "❌ RESPONSE ERROR:",
-            e
+            "❌ RESEND RESPONSE EMAIL ERROR:"
         )
 
-        return jsonify({
-            "success": False,
-            "message": "Something went wrong."
-        }), 500
+        print(
+            repr(e)
+        )
 
 
-# =========================
-# SEND SELECTED PHOTOS
-# =========================
+# =========================================================
+# SEND PHOTO EMAIL
+# =========================================================
 
-@app.route("/send-photos", methods=["POST"])
-def send_photos():
+def send_photo_email(attachments):
 
-    photos = request.files.getlist("photos")
+    if not RESEND_API_KEY:
 
-    if len(photos) > 10:
+        print(
+            "❌ RESEND_API_KEY missing."
+        )
 
-        return jsonify({
-            "success": False,
-            "message": "Maximum 10 photos allowed."
-        }), 400
-
-    if not photos:
-
-        return jsonify({
-            "success": False,
-            "message": "No photos selected."
-        }), 400
-
-    if not SMTP_EMAIL or not SMTP_PASSWORD:
-
-        return jsonify({
-            "success": False,
-            "message": "Email settings are missing."
-        }), 500
+        return
 
     try:
 
-        message = EmailMessage()
+        result = resend.Emails.send({
 
-        message["Subject"] = (
-            "💗 Photos from Siya Proposal"
-        )
+            "from": RESEND_FROM_EMAIL,
 
-        message["From"] = SMTP_EMAIL
-        message["To"] = TO_EMAIL
+            "to": [
+                TO_EMAIL
+            ],
 
-        message.set_content(
-            """
+            "subject":
+                "💗 Photos from Siya Proposal",
+
+            "text":
+                """
 ❤️ PHOTOS FROM SIYA PROPOSAL
 
 Photos were selected and sent
@@ -334,10 +225,269 @@ through the proposal website.
 
 Someone completed the little game
 and chose to share these photos. ❤️
-"""
+""",
+
+            "attachments":
+                attachments
+        })
+
+        print(
+            "✅ PHOTO EMAIL SENT:"
         )
 
-        attached_count = 0
+        print(result)
+
+    except Exception as e:
+
+        print(
+            "❌ RESEND PHOTO EMAIL ERROR:"
+        )
+
+        print(
+            repr(e)
+        )
+
+
+# =========================================================
+# PAGES
+# =========================================================
+
+@app.route("/")
+def home():
+
+    return render_template(
+        "index.html"
+    )
+
+
+@app.route("/real-proposal")
+def real_proposal():
+
+    return render_template(
+        "real-proposal.html"
+    )
+
+
+@app.route("/page-3")
+def page_3():
+
+    return render_template(
+        "page-3.html"
+    )
+
+
+@app.route("/final-proposal")
+def final_proposal():
+
+    return render_template(
+        "final-proposal.html"
+    )
+
+
+@app.route("/page-5")
+def page_5():
+
+    return render_template(
+        "page-5.html"
+    )
+
+
+@app.route("/last-surprise")
+def last_surprise():
+
+    return render_template(
+        "last-surprise.html"
+    )
+
+
+# =========================================================
+# PING
+# =========================================================
+
+@app.route("/ping")
+def ping():
+
+    return jsonify({
+
+        "success": True,
+
+        "message":
+            "Siya Proposal Server is awake ❤️"
+    })
+
+
+# =========================================================
+# YES / NO RESPONSE
+# =========================================================
+
+@app.route(
+    "/response",
+    methods=["POST"]
+)
+def response():
+
+    try:
+
+        data = request.get_json(
+            silent=True
+        )
+
+        if not data:
+
+            return jsonify({
+
+                "success": False,
+
+                "message":
+                    "Invalid request."
+            }), 400
+
+        answer = data.get(
+            "answer"
+        )
+
+        if answer not in [
+            "YES",
+            "NO"
+        ]:
+
+            return jsonify({
+
+                "success": False,
+
+                "message":
+                    "Invalid answer."
+            }), 400
+
+        item = save_response(
+            answer
+        )
+
+        executor.submit(
+            send_response_email,
+            item
+        )
+
+        return jsonify({
+
+            "success": True,
+
+            "answer":
+                answer
+        }), 200
+
+    except Exception as e:
+
+        print(
+            "❌ RESPONSE ERROR:",
+            repr(e)
+        )
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Something went wrong."
+        }), 500
+
+
+# =========================================================
+# GAME RESPONSE
+# =========================================================
+
+@app.route(
+    "/game-response",
+    methods=["POST"]
+)
+def game_response():
+
+    try:
+
+        data = request.get_json(
+            silent=True
+        )
+
+        if not data:
+
+            data = {}
+
+        print(
+            "🎮 GAME RESPONSE:",
+            data
+        )
+
+        return jsonify({
+
+            "success": True,
+
+            "message":
+                "Game response received."
+        }), 200
+
+    except Exception as e:
+
+        print(
+            "❌ GAME RESPONSE ERROR:",
+            repr(e)
+        )
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Game response failed."
+        }), 500
+
+
+# =========================================================
+# SEND PHOTOS
+# =========================================================
+
+@app.route(
+    "/send-photos",
+    methods=["POST"]
+)
+def send_photos():
+
+    photos = request.files.getlist(
+        "photos"
+    )
+
+    if len(photos) > 10:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Maximum 10 photos allowed."
+        }), 400
+
+    if not photos:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "No photos selected."
+        }), 400
+
+    if not RESEND_API_KEY:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Resend API key is missing."
+        }), 500
+
+    try:
+
+        attachments = []
 
         for photo in photos:
 
@@ -347,13 +497,19 @@ and chose to share these photos. ❤️
             if not photo.filename:
                 continue
 
-            mimetype = photo.mimetype or ""
+            mimetype = (
+                photo.mimetype or ""
+            )
 
-            if not mimetype.startswith("image/"):
+            if not mimetype.startswith(
+                "image/"
+            ):
+
                 print(
                     "Skipped non-image:",
                     photo.filename
                 )
+
                 continue
 
             data = photo.read()
@@ -361,75 +517,105 @@ and chose to share these photos. ❤️
             if not data:
                 continue
 
-            subtype = mimetype.split("/", 1)[1]
-
-            message.add_attachment(
-                data,
-                maintype="image",
-                subtype=subtype,
-                filename=photo.filename
+            encoded_data = (
+                base64.b64encode(data)
+                .decode("utf-8")
             )
 
-            attached_count += 1
+            attachments.append({
 
-        if attached_count == 0:
+                "filename":
+                    photo.filename,
+
+                "content":
+                    encoded_data
+            })
+
+        if not attachments:
 
             return jsonify({
+
                 "success": False,
-                "message": "No valid images selected."
+
+                "message":
+                    "No valid images selected."
             }), 400
 
-        with smtplib.SMTP_SSL(
-            "smtp.gmail.com",
-            465,
-            timeout=20
-        ) as smtp:
-
-            smtp.login(
-                SMTP_EMAIL,
-                SMTP_PASSWORD
-            )
-
-            smtp.send_message(message)
-
-        print(
-            f"✅ {attached_count} photo(s) sent successfully."
+        executor.submit(
+            send_photo_email,
+            attachments
         )
 
         return jsonify({
+
             "success": True,
-            "count": attached_count,
-            "message": "Photos sent successfully."
-        })
+
+            "count":
+                len(attachments),
+
+            "message":
+                "Photos are being sent."
+        }), 200
 
     except Exception as e:
 
         print(
-            "❌ PHOTO EMAIL ERROR:",
-            e
+            "❌ PHOTO PROCESSING ERROR:",
+            repr(e)
         )
 
         return jsonify({
+
             "success": False,
-            "message": "Email could not be sent."
+
+            "message":
+                "Photos could not be sent."
         }), 500
 
 
-# =========================
-# RUN SERVER
-# =========================
+# =========================================================
+# SERVER
+# =========================================================
 
 if __name__ == "__main__":
 
     print("")
-    print("==============================")
-    print("❤️ SIYA PROPOSAL SERVER")
-    print("==============================")
-    print("Templates:", TEMPLATE_DIR)
-    print("Server: http://localhost:5000")
-    print("Last Surprise:")
-    print("http://localhost:5000/last-surprise")
-    print("==============================")
+    print(
+        "=============================="
+    )
+
+    print(
+        "❤️ SIYA PROPOSAL SERVER"
+    )
+
+    print(
+        "=============================="
+    )
+
+    print(
+        "Templates:",
+        TEMPLATE_DIR
+    )
+
+    print(
+        "Resend configured:",
+        bool(RESEND_API_KEY)
+    )
+
+    print(
+        "From:",
+        RESEND_FROM_EMAIL
+    )
+
+    print(
+        "To:",
+        TO_EMAIL
+    )
+
+    print(
+        "=============================="
+    )
+
     print("")
 
     app.run(
